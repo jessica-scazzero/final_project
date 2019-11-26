@@ -1,0 +1,88 @@
+---
+title: "testing/data manipulation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+```
+
+
+```{r setup, include=FALSE}
+
+cash <- read_csv("who_uses_cash/merged.csv")
+
+time_payment <- cash %>%
+mutate(time_rounded = 100*ceiling((time)/100)) %>%
+  filter(!time_rounded %in% c("2450", NA, "0")) %>%
+  mutate(payment = ifelse(pi == 3, 1, 0)) %>%
+  filter(!is.na(payment)) %>% 
+  group_by(time_rounded, payment) %>%
+  count() %>% 
+  ungroup() %>% 
+  group_by(time_rounded) %>% 
+  mutate(n = ifelse(payment == 0, sum(n), n))
+
+ggplot(time_payment, aes(x=time_rounded, y=n, color = payment)) + geom_point()
+
+time_transaction_type <- cash %>%
+mutate(time_rounded = 100*ceiling((time)/100)) %>%
+  filter(!time_rounded %in% c("2450", NA, "0")) %>%
+  mutate(merch_type = ifelse(merch == 4, 1, 0)) %>%
+  filter(!is.na(merch_type)) %>% 
+  group_by(time_rounded, merch_type) %>%
+  count() %>% 
+  ungroup() %>% 
+  group_by(time_rounded) %>% 
+  mutate(n = ifelse(merch_type == 0, sum(n), n))
+
+ggplot(time_transaction_type, aes(x=time_rounded, y=n, color = merch_type)) + geom_point()
+
+
+time_transaction_type_2 <- cash %>%
+mutate(time_rounded = 100*ceiling((time)/100)) %>%
+  filter(!time_rounded %in% c("2450", NA, "0")) %>%
+  mutate(time_rounded = as.numeric(time_rounded)) %>%
+  filter(!is.na(merch)) %>% 
+  group_by(time_rounded) %>%
+  summarise(avg = sum(merch == 3)/n(), na.rm = TRUE)
+
+ggplot(time_transaction_type_2, aes(x=time_rounded, y=avg)) + geom_line() + labs(title = "Change in Transaction Ty", x = "Time", y = "Frequency of Transaction Type") + scale_x_continuous(breaks = c(400, 800, 1200, 1600, 2000, 2400), labels=c("4am", "8am", "12pm", "4pm", "8pm", "12am"))
+
+income <- cash %>%
+  filter(income_hh == 8) %>%
+  filter(pi %in% c(1,2,3,4,5,6,7)) %>%
+  group_by(pi) %>%
+  count() %>%
+  mutate(avg = sum(pi == 1)/sum(n))
+
+merged_2 <- cash %>%
+mutate(education_level = ifelse(highest_education %in% c(1,2,3,4,5,6,7,8), 1,
+                   ifelse(highest_education == 9, 2,
+                   ifelse(highest_education %in% c(11,12), 3,
+                   ifelse(highest_education == 13, 4,
+                   ifelse(highest_education == 14, 5,
+                   ifelse(highest_education == 15, 6, 
+                   ifelse(highest_education == 16, 7, 0)))))))) %>%
+mutate(income_level = ifelse(income_hh %in% c(1,2,3,4), 1,
+                  ifelse(income_hh %in% c(4,5,6), 2,
+                  ifelse(income_hh %in% c(7,8), 3,
+                  ifelse(income_hh %in% c(9,10), 4,
+                  ifelse(income_hh == 11, 5,
+                  ifelse(income_hh == 12, 6,
+                  ifelse(income_hh == 13, 7,
+                  ifelse(income_hh == 14, 8,
+                  ifelse(income_hh == 15, 9,
+                  ifelse(income_hh == 16, 10,
+                  ifelse(income_hh == 17, 11,
+                  ifelse(income_hh == 18, 12, 0)))))))))))))
+  
+write.csv(merged_2, file = "merged_2.csv")
+
+summary(merged_2$age)
+
+
+
+```
