@@ -83,6 +83,43 @@ write.csv(merged_2, file = "merged_2.csv")
 
 summary(merged_2$age)
 
+graph <- cash %>%
+    filter(income_hh == 12) %>%
+      filter(pi %in% c(1,2,3,4,5,6,7)) %>%
+      group_by(pi) %>%
+      count()
 
+ggplot(graph, aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+
+graph2 <- cash %>%
+  mutate(pi_2 = ifelse(pi == 1, 1,
+                ifelse(pi == 2, 2,
+                ifelse(pi == 3, 3,
+                ifelse(pi == 4, 4, 5))))) %>%
+filter(pi_2 %in% c(1,3,4)) %>%
+filter(merch %in% c(1,2,3,4,5,6,7)) %>%
+mutate(merch = fct_relevel(as.factor(merch), c("3", "5", "6", "2", "4", "1", "7"))) %>%
+drop_na(merch) %>%
+filter(year == "2015")
+
+check <- cash %>%
+select(merch)
+
+ggplot(graph2, aes(merch, fill = pi_2)) + geom_bar()
+
+graph3 <- graph2 %>%
+  group_by(merch) %>%
+  count()
+
+p <-ggplot(graph2, aes(x = merch, y = stat(count), fill = pi))
+
+p
+
+ggplot(data = graph2) + 
+geom_bar(mapping = aes(x = as.factor(merch), fill = as.factor(pi_2))) +  scale_fill_manual(values = c("#18BC9C", "#2C3E50", "#3498DB"), name = "Payment Type", labels=c("Cash", "Debit Card", "Credit Card")) + scale_x_discrete(labels=c( "7" = "Arts & Entertainment", "1" = "Convenience & Grocery", "4" = "Fast-food & Cafes", "2" = "Gas stations", "6" = "General Services", "3" = "Sit-down Restaurants",  "5" = "Shopping")) + theme(axis.text.x=element_text(angle=45, hjust=1)) + coord_flip() + labs(title = "Frequency of Transaction Type by Payment", x = "Transaction Type", y = "Frequency", fill = "Payment Type")
+
+#F39C12 #E74C3C
+
+ggplot(graph2, aes(x = merch, y = pi_2, fill = pi_2)) + geom_bar() +
 
 ```

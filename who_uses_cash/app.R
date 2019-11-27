@@ -45,7 +45,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                                 "20,000 - 29,999" = 3,
                                                                 "30,000 - 39,999" = 4,
                                                                 "40,000 - 49,999" = 5,
-                                                                "50,000 - 59,999)" = 6,
+                                                                "50,000 - 59,999" = 6,
                                                                 "60,000 - 74,999" = 7,
                                                                 "75,000 - 99,999" = 8,
                                                                 "100,000 - 124,999" = 9,
@@ -61,13 +61,23 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                       sliderInput("age",
                                                   "Select an age:",
                                                   min = 18,
-                                                  max = 98,
-                                                  value = c(18,98))
+                                                  max = 90,
+                                                  value = 18)
                                       ),
                                       mainPanel(
                                         plotOutput("plot_3")
                                       )))),
-                tabPanel("When is cash used?",
+                           tabPanel("What Is Cash Used For?",
+                                    sidebarPanel(
+                                      checkboxGroupInput("year", 
+                                                         h3("Select Year(s)"), 
+                                                         choices = list("2016" = "2016", 
+                                                                        "2017" = "2017"),
+                                                         selected = c("2016", "2017"))),
+                                    mainPanel(
+                                      plotOutput("plot_4"))),
+        
+                tabPanel("When Is Cash Used?",
                          tabsetPanel(
                            tabPanel("Cash Usage by Payment Type",
                          sidebarPanel(
@@ -81,29 +91,29 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                    "Online Banking" = 7)
                            )), 
                          mainPanel(
-                           plotOutput("plot_4")
+                           plotOutput("plot_5")
                          )),
                          tabPanel("Cash Usage by Transaction Type",
                                   sidebarPanel(
                                     selectInput("transaction", "Select a Transaction Type",
-                                                choices = c("Convenience stores, groceries, pharmacies" = 1,
+                                                choices = c("Convenience & Grocery" = 1,
                                                             "Gas stations" = 2,
-                                                            "Sit-down restaurants and bars" = 3,
-                                                            "Fast-food, coffee shops, cafeterias, food trucks" = 4,
-                                                            "General merchandise, department stores, online shopping" = 5,
-                                                            "Services: hair dressers, auto repair, dry cleaning, etc" = 6,
-                                                            "Arts, entertainment, recreation" = 7,
-                                                            "Credit card, bank, insurance, investment payments" = 15,
-                                                            "Charitable or religious donations" = 17,
+                                                            "Sit-down Restaurants" = 3,
+                                                            "Fast-food & Cafes" = 4,
+                                                            "Shopping" = 5,
+                                                            "General Services" = 6,
+                                                            "Arts & Entertainment" = 7,
+                                                            "Financial Payments" = 15,
+                                                            "Donations" = 17,
                                                             "Medical expenses" = 18)
                                     )), 
                                   mainPanel(
-                                    plotOutput("plot_5")
+                                    plotOutput("plot_6")
                                           
                          )))),
-                           tabPanel("What Factors Predict Cash Usage",
-                                    htmlOutput("regression")
-                           ),
+                tabPanel("What Factors Predict Cash Usage",
+                         htmlOutput("regression")
+                ),
                            tabPanel("About",
                                     h1("About Section"),
                                     h2("Background/Research Questions"),
@@ -129,7 +139,7 @@ server <- function(input, output) {
   output$plot_1 <- renderPlot({
     
     datareact1() %>%
-      ggplot(aes(x=factor(pi), y=n)) +  geom_col() + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+      ggplot(aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
     
   }) 
   
@@ -144,7 +154,7 @@ server <- function(input, output) {
   output$plot_2 <- renderPlot({
     
     datareact2() %>%
-    ggplot(aes(x=factor(pi), y=n)) +  geom_col() + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+      ggplot(aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
       
   }) 
   
@@ -160,10 +170,32 @@ server <- function(input, output) {
   output$plot_3 <- renderPlot({
   
     datareact3() %>%
-    ggplot(aes(x=factor(pi), y=n)) +  geom_col() + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1)) 
-  })  
-      
+      ggplot(aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1)) 
+  }) 
+  
   datareact4 <- reactive({
+    cash %>%
+      mutate(pi_2 = ifelse(pi == 1, 1,
+                           ifelse(pi == 2, 2,
+                                  ifelse(pi == 3, 3,
+                                         ifelse(pi == 4, 4, 5))))) %>%
+      filter(pi_2 %in% c(1,3,4)) %>%
+      filter(merch %in% c(1,2,3,4,5,6,7)) %>%
+      mutate(merch = fct_relevel(as.factor(merch), c("3", "5", "6", "2", "4", "1", "7"))) %>%
+      drop_na(merch) %>%
+      filter(year == input$year)
+    
+  })
+  
+  output$plot_4 <- renderPlot({
+    
+    datareact4() %>%
+      ggplot() + 
+      geom_bar(mapping = aes(x = as.factor(merch), fill = as.factor(pi_2))) +  scale_fill_manual(values = c("#18BC9C", "#2C3E50", "#3498DB"), name = "Payment Type", labels=c("Cash", "Debit Card", "Credit Card")) + scale_x_discrete(labels=c( "7" = "Arts & Entertainment", "1" = "Convenience & Grocery", "4" = "Fast-food & Cafes", "2" = "Gas stations", "6" = "General Services", "3" = "Sit-down Restaurants",  "5" = "Shopping")) + theme(axis.text.x=element_text(angle=45, hjust=1)) + coord_flip() + labs(title = "Frequency of Transaction Type by Payment", x = "Transaction Type", y = "Frequency", fill = "Payment Type")
+    
+  })
+      
+  datareact5 <- reactive({
     cash %>%
     mutate(time_rounded = 100*ceiling((time)/100)) %>%
       filter(!time_rounded %in% c("2450", NA, "0")) %>%
@@ -176,14 +208,14 @@ server <- function(input, output) {
       mutate(n = ifelse(payment == 0, sum(n), n))
   })
   
-  output$plot_4 <- renderPlot({
+  output$plot_5 <- renderPlot({
     
-    datareact4() %>%
-      ggplot(aes(x=time_rounded, y=n, color = as.factor(payment))) + geom_point() + labs(title = "Change in Payment Method Use Over the Course of a Day", col = "Key", x = "Time", y = "Frequency of Payment Type") + scale_color_manual(labels = c("All Payment Types","Selected Payment Type"), values = c("darkblue", "skyblue1"))
+    datareact5() %>%
+      ggplot(aes(x=time_rounded, y=n, color = as.factor(payment))) + geom_point() + geom_line(type = "longdash") + labs(title = "Change in Payment Method Use Over the Course of a Day", col = "Key", x = "Time", y = "Frequency of Payment Type") + scale_color_manual(labels = c("All Payment Types","Selected Payment Type"), values = c("#2C3E50", "#18BC9C")) + scale_x_continuous(breaks = c(400, 800, 1200, 1600, 2000, 2400), labels=c("4am", "8am", "12pm", "4pm", "8pm", "12am"))
     
   })
   
-  datareact5 <- reactive({
+  datareact6 <- reactive({
     cash %>%
       mutate(time_rounded = 100*ceiling((time)/100)) %>%
       filter(!time_rounded %in% c("2450", NA, "0")) %>%
@@ -194,13 +226,12 @@ server <- function(input, output) {
 
   })
   
-  output$plot_5 <- renderPlot({
+  output$plot_6 <- renderPlot({
     
-    datareact5() %>%
-    ggplot(aes(x=time_rounded, y=avg)) + geom_point(color = "darkblue", size = 2) + geom_line(linetype = "longdash", color = "darkblue") + labs(title = "Change in Transaction Type Frequency Over the Course of a Day", x = "Time", y = "Percentage of Given Transaction Type") + scale_x_continuous(breaks = c(400, 800, 1200, 1600, 2000, 2400), labels=c("4am", "8am", "12pm", "4pm", "8pm", "12am"))
+    datareact6() %>%
+    ggplot(aes(x=time_rounded, y=avg)) + geom_point(color = "#18BC9C", size = 2) + geom_line(linetype = "longdash", color = "#18BC9C") + labs(title = "Change in Transaction Type Frequency Over the Course of a Day", x = "Time", y = "Percentage of Given Transaction Type") + scale_x_continuous(breaks = c(400, 800, 1200, 1600, 2000, 2400), labels=c("4am", "8am", "12pm", "4pm", "8pm", "12am"))
     
   })  
-    
   
   getPage <- function() {
     return(includeHTML("regression.html"))
