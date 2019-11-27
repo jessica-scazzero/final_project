@@ -1,0 +1,12 @@
+name: who_uses_cash
+title: who_uses_cash
+username:
+account: jessica-scazzero
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1526299
+bundleId: 2621070
+url: https://jessica-scazzero.shinyapps.io/who_uses_cash/
+when: 1574831530.30917
+asMultiple: FALSE
+asStatic: FALSE
