@@ -22,19 +22,21 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                 #used navbarpage to create a navbar shiny app set up, used tab panel to create the tabs within my shiny app, within the first tab map I called imageoutput referencing map, which I then specified in the server section below, inside the second tab, about I used h4 to set a header and p to specify a paragraph of text that I entered 
                 navbarPage("Exploring Consumer Cash Usage Data",
                            tabPanel("Who Uses Cash?",
+                                    
+                        #used tabset panel to create a panel within my overall panel 
                                     tabsetPanel(
                                     tabPanel("Cash Usage by Education",
                                     sidebarPanel(
                                       selectInput("educ", "Select an education level:",
                                                   choices = c("Some High School, No Degree" = 1,
                                                               "High School Degree" = 2,
-                                                              "Associate Degree" = 3,
                                                               "Bachelors Degree" = 4,
                                                               "Masters Degree" = 5,
                                                               "Professional Degree" = 6,
                                                               "Doctorate Degree" = 7)
                                       )),
                                     mainPanel(
+                                      h2("Decreasing Cash Usage with Education"),
                                       plotOutput("plot_1")
                                     )),
                                     tabPanel("Cash Usage by Income",
@@ -54,6 +56,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                                 "500,000 Plus" = 12 )  
                                          )),                          
                                         mainPanel(
+                                          h2("Decreasing Cash Usage with Income"),
                                           plotOutput("plot_2")    
                                              )),
                                     tabPanel("Cash Usage by Age",
@@ -65,6 +68,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                                   value = 18)
                                       ),
                                       mainPanel(
+                                        h2("Increasing Cash Usage with Age"),
                                         plotOutput("plot_3")
                                       )))),
                            tabPanel("What Is Cash Used For?",
@@ -111,9 +115,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                     plotOutput("plot_6")
                                           
                          )))),
-                tabPanel("What Factors Predict Cash Usage",
-                         htmlOutput("regression")
-                ),
+                         tabPanel("What Factors Predict Cash Usage",
+                         h1("Regression Analysis"),
+                         p("This model has the following specification: Y = a + Bx + controls"),
+                         p("Based on the findings of the model age, income and education level are strong predictors of cash usage - even when controling for transaction specific factors like the amount of the payment. As we saw in the graphs"),
+                         htmlOutput("regression")),
                            tabPanel("About",
                                     h1("About Section"),
                                     h2("Background/Research Questions"),
