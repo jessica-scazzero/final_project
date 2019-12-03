@@ -107,9 +107,10 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                     sidebarPanel(
                                       checkboxGroupInput("year", 
                                                          h3("Select Year(s)"), 
-                                                         choices = list("2016" = "2016", 
+                                                         choices = list("2015" = "2015",
+                                                                        "2016" = "2016", 
                                                                         "2017" = "2017"),
-                                                         selected = c("2016", "2017"))),
+                                                         selected = c("2015", "2016", "2017"))),
                                
                             #within main panel have plot output which corresponds with function in output section below
                                 
@@ -175,10 +176,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          p("This model has the following specification: Y = a + Bx + controls"),
                          p("Where y is a binary variable for whether a transaction was carried out using cash, B is a vector of demographic characteristics of the person including age, income, education and race and controls is a vector of transaction level controls including the amount of payment, the year the payment was made and the transaction type."), 
                          p("Since the dependent variable of the regression is a binary variable, a logistic model was used. Within this regression specification, the coefficients are interpreted as a relative increase/decrease in the log of the probability of a cash transaction."),
-                         htmlOutput("regression"),
+                         column(align = "center", width = 12,
+                         htmlOutput("regression")),
                          p("Based on the findings of the model age, income and education level are strong predictors of cash usage. As we saw in the graphs, higher age is assocaited with higher probability of cash usage, while higher education and income level are associated with lower probabilities of cash usage."),
                          p("Additionally, the coefficients on the race dummy variables for Whites and Asians are significant and negative at the 10% level - meaning that white and Asian people have a lower probability of transacting with cash. While the transaction level variables were used as controls the coefficients on these variables are also very interesting. The coefficient on transaction is negative - suggesting that cash is more likely to be used on lower value transactions. The coefficient on services, fast food and restaurants are also signficant and postive - confirming trends shown in the transaction level graphs that cash is more likely to be used with these transaction types."),
-                         p("Similarly, the coefficients on preferences for cash are very interesting. Preferences for cash are divided into dummy variables based on transaction value - where paypref_25to50, for example, represents preference for using cash for transactions between $25 and $50. Interestly, those who prefer cash for transactions lower than $50 are less likely to transact with cash, while those who prefer cash for transactions between $50 and $100 are more likely to transact with cash. This trend is especially interesting given the earlier finding that cash is more likely to be used for lower value transactions. It suggests that preference for higher values of cash is more indicative of an individual's overall affinity for cash use."),
+                         p("Similarly, the coefficients on preferences for cash are very interesting. Preferences for cash are divided into dummy variables based on transaction value - where Pref. for Cash 25 - 50, for example, represents preference for using cash for transactions between $25 and $50. Interestly, those who prefer cash for transactions lower than $50 are less likely to transact with cash, while those who prefer cash for transactions between $50 and $100 are more likely to transact with cash. This trend is especially interesting given the earlier finding that cash is more likely to be used for lower value transactions. It suggests that preference for higher values of cash is more indicative of an individual's overall affinity for cash use."),
                          p("Lastly, the dummy variable for year2017 is positive - suggesting that the probability of using cash is greater in 2017, though we cannot make any definitive conclusions because we have not controled for differences in the number of observations per year (the total number of transactions in 2017, however, is lower than the total number of transactions for both 2015 and 2016.")),
                 
                 #final tabpanel with the about section            
