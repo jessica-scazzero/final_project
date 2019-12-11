@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(tidyverse)
+library(tidyr) 
+library(dplyr)
 ```
 
 
@@ -120,6 +122,70 @@ geom_bar(mapping = aes(x = as.factor(merch), fill = as.factor(pi_2))) +  scale_f
 
 #F39C12 #E74C3C
 
-ggplot(graph2, aes(x = merch, y = pi_2, fill = pi_2)) + geom_bar() +
+ggplot(graph2, aes(x = merch, y = pi_2, fill = pi_2)) + geom_bar()
+
+
+cash_by_year <- merged_2 %>%
+  drop_na(year) %>%
+  drop_na(pi) %>%
+  mutate(pi_2 = ifelse(pi == 1, 1,
+                ifelse(pi == 2, 2,
+                ifelse(pi == 3, 3,
+                ifelse(pi == 4, 4, 5))))) %>%
+group_by(year, pi_2) %>%
+summarize(count = n()) %>% 
+  ungroup() %>%
+  group_by(year) %>% 
+  mutate(relative = count/n())
+
+ggplot(data = cash_by_year) + 
+geom_col(mapping = aes(x = year, y = relative)) 
+
++ geom_text(aes(x = year, label = paste0(relative,'%')),
+            colour = 'white', position=position_stack(vjust=0.5))
+
+merged_2 %>%
+drop_na(year) %>%
+drop_na(pi) %>%
+mutate(pi_2 = ifelse(pi == 1, 1,
+ifelse(pi == 2, 2,
+ifelse(pi == 3, 3,
+ifelse(pi == 4, 4, 5))))) %>% group_by(year, pi_2) %>% count() %>% ungroup() %>% group_by(year) %>% mutate(relative = n/sum(n)) %>% view()
+
+
+#group_by(year) %>%
+ summarize(percent_cash = sum(pi == 1)/)
+
+ggplot(data = cash_by_year) + 
+geom_col(mapping = aes(x = year, y = percent_cash))
+  
+  
+cash_by_year_2 <- merged_2 %>%
+  drop_na(year) %>%
+  drop_na(pi) %>%
+   mutate(pi_2 = ifelse(pi == 1, 1,
+                ifelse(pi == 2, 2,
+                ifelse(pi == 3, 3,
+                ifelse(pi == 4, 4, 5))))) %>%
+  group_by(year, pi_2) %>%
+  summarise('number'=sum(pi_2)) %>%
+  ungroup() %>%
+  mutate('relative'=unlist(by(data = number, INDICES = year, 
+                              FUN = function(x) round(x/sum(x)*100, digits = 1))))
+  
+ggplot(merged_2, )
+
+
+final_year_graph <- merged_2 %>%
+  drop_na(year) %>%
+  drop_na(pi) %>%
+  mutate(pi_2 = ifelse(pi == 1, 1,
+                ifelse(pi == 3, 2,
+                ifelse(pi == 4, 3, 4)))) %>% group_by(year, pi_2) %>% count() %>% ungroup() %>% group_by(year) %>% mutate(relative = n/sum(n))
+
+ggplot(data = final_year_graph) + 
+geom_col(mapping = aes(x = year, y = relative, fill = as.factor(pi_2))) 
+
+ggplot(final_year_graph, aes(x=year, y=relative, group = pi_2)) + geom_line()
 
 ```
