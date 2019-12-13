@@ -124,7 +124,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                   
                 tabPanel("When Is Cash Used?",
                          tabsetPanel(
-                           tabPanel("Cash Usage by Payment Type",
+                           tabPanel("Expenditures by Payment Type",
                          
                           #used select input within sidebar panel to create payment type choices 
                                     
@@ -148,7 +148,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          
                          #new tabpanel within tabset representing cash usage by transaction type, used select input again just as in past examples
                          
-                         tabPanel("Cash Usage by Transaction Type",
+                         tabPanel("Expenditures by Transaction Type",
                                   sidebarPanel(
                                     selectInput("transaction", "Select a Transaction Type",
                                                 choices = c("Convenience & Grocery" = 1,
@@ -166,7 +166,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                   #within main panel have plot output which corresponds with function in output section below
                                   
                                   mainPanel(
-                                    h2("Specific Trends in Cash Usage by Transaction Type"),
+                                    h2("Specific Trends in Expenditures by Transaction Type"),
                                     plotOutput("plot_6")
                                           
                          )))),
@@ -190,12 +190,16 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                 tabPanel("About",
                                     h1("About Section"),
                                     h2("Background/Research Questions"),
-                                    p("Technology has rapidly transformed almost every aspect of our lives - including the way we carry out payments. Within recent years, the devlopment of PayPal, Ripple, Venmo among other mobile money payment systesm have acclerated the presence and access of cashless technologies across societies. But, despite this growth in technology, cash continues to persist both for use in transactions and a store of value. In order to answer this question we must understand: Who is using cash? Who is holding cash? What types of transactions is it used for? And, how often is it used?"),
+                                    p("Technology has rapidly transformed almost every aspect of our lives - including the way we carry out payments. Within recent years, the devlopment of PayPal, Ripple, Venmo among other mobile money payment systesm have acclerated the presence and access of cashless technologies across societies. Yet, despite this growth in technology, cash continues to make up a substantial portion of everyday transactions (see figure below). In order to answer this question we must understand: Who is using cash? Who is holding cash? What types of transactions is it used for? And, when is it used?"),
                                     img(src="my_plot.png", align = "center"),
                                     h3("The Data"),
-                                    p("To answer this question I used data from the Federal Reserve's Diary of Consumer Payment Choice (DCPC). The DCPC is a survey of consumer payment behavior run in conjunction with the University of Southern California’s Understanding America Study (UAS). Respondents were randomly assigned a three-day period and asked to track all of their payments using an online questionnaire. I plan to combine data from the 2017, 2016 and 2015 data sets as well as use both the individual level and transaction level data."),
-                                    h4("About Me"),
-                                    p("My name is Jessica, I'm a senior economics concentrator and I am writing my thesis on a similar topic analyzing the changes in cash demand across countries and across time. I'm really excited to be using data science to observe trends that I can potentially include in my larger inquiry into cash in  my thesis.")
+                                    p("To answer this question I used data from the Federal Reserve's Diary of Consumer Payment Choice (DCPC). The DCPC is a survey of consumer payment behavior run in conjunction with the University of Southern California’s Understanding America Study (UAS). Respondents were randomly assigned a three-day period and asked to track all of their payments using an online questionnaire. I combined data from the 2017, 2016 and 2015 data sets to create a merged data set of both individual level and transaction level data across a three year period."),
+                                    h3("Sources"),
+                                    p("Click ", a("here", href="https://www.frbatlanta.org/banking-and-payments/consumer-payments/diary-of-consumer-payment-choice"), " to find the Federal Reserve's Diary of Consumer Payment Choice Data"),
+                                    p("Click ", a("here", href="https://github.com/jessica-scazzero/who_uses_cash/tree/master"), " to find the link to the Github Repo for this project"),
+                                    h3("About Me"),
+                                    p("My name is Jessica, I'm a senior economics concentrator and I am writing my thesis on a similar topic analyzing the changes in cash demand across countries and across time. I'm really excited to be using data science to observe trends that I can potentially include in my larger inquiry into cash in  my thesis."),
+                                    embed_url("https://youtu.be/xul-o8x5nio")
                            )))
 
 
