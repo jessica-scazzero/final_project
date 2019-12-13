@@ -3,7 +3,7 @@ title: "Final Project Data Merging and Exploration Document"
 name: "Jessica Scazzero"
 date: "12/13/2019"
 output:
----
+ html_document: default
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
@@ -101,9 +101,9 @@ clean_2015 <- data_2015 %>%
                         ))))))))))))))) %>%
   mutate(date = as.Date(date, "%d%b%Y"))
 
-check <- merged %>%
-  filter(year == "2015") %>%
-  select(merch)
+#check <- merged %>%
+  #filter(year == "2015") %>%
+  #select(merch)
 #2015 - no cc_num, no hispaniclatino no work_occupation,, submerch, storedcash_amnt, storedcash_amnt_payments, storedcash_amnt_savings,  denom_100_stored, denom_10_stored, denom_1_stored, denom_20_stored, denom_2_stored, denom_50_stored, denom_5_stored
 
 #dropped highest_education due to the majority of values missing and corrupted data column overall
