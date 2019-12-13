@@ -1,21 +1,218 @@
 ---
-title: "testing/data manipulation"
-output: html_document
+title: "Final Project Data Merging and Exploration Document"
+name: "Jessica Scazzero"
+date: "12/13/2019"
+output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
-library(tidyverse)
-library(tidyr) 
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
 library(dplyr)
+library(fs)
+library(rstanarm)
+library(gganimate)
+library(tidyverse)
+library(rsq)
+library(jtools)
+library(stargazer)
+library(sjPlot)
+library(ggplot2)
+library(tidyr) 
 ```
 
 
-```{r setup, include=FALSE}
+```{r 2017 data}
+#load 2017 individual level data
+individual <- read_csv(file="Raw-Data/dcpc_2017_indlevel-csv.csv")
+
+#load 2017 transaction level data
+transaction <- read_csv(file="Raw-Data/dcpc_2017_tranlevel-csv.csv")
+```
+
+```{r 2017 merged/ cleaned data}
+#2017 individual/transaction joined data
+joined <- transaction %>%
+  left_join(individual, by = "prim_key")
+
+# Notes from my session with Sacha -
+#m1 <- lm(y ~ statedpref, data = joined)
+#joined$residual <- residuals(m1)
+
+#cleaned 2017 data final 
+clean_2017 <- joined %>%
+  select(age, income_hh, gender, highest_education, cc_num, race_white, race_black, race_asian, race_other, hispaniclatino, amnt, date, time, paypref_100plus, paypref_lt10, paypref_10to25, paypref_25to50, paypref_50to100, work_employed, work_occupation, work_self, pi, merch, homeowner, type)
+
+```
+
+
+```{r 2016 data}
+#loaded in 2016 data
+data_2016 <- read_csv(file="Raw-Data/dcpc-2016-public-data-csv.csv")
+
+#cleaned 2016 data
+clean_2016 <- data_2016 %>%
+drop_na(tran) %>%
+  rename(gender = male) %>%
+  select(age, income_hh, gender, highest_education, cc_num, race_white, race_black, race_asian, race_other, hispaniclatino, amnt, date, time, paypref_100plus, paypref_lt10, paypref_10to25, paypref_25to50, paypref_50to100, work_employed, work_occupation, work_self, pi, submerch, homeowner, type, carry_cc, carry_chk, carry_csh, carry_dc, enough_cash, e_exp_csh, storedcash_amnt, storedcash_amnt_payments, storedcash_amnt_savings,  denom_100_stored, denom_10_stored, denom_1_stored, denom_20_stored, denom_2_stored, denom_50_stored, denom_5_stored) %>%
+  mutate(merch = ifelse(submerch %in% c(8,9), 3,
+                 ifelse(submerch == 10, 2,
+                 ifelse(submerch %in% c(6,7), 4,
+                 ifelse(submerch %in% c(3,5,11), 1,
+                 ifelse(submerch %in% c(12,13,14,15,19,20,21,25,27,29,33), 5,
+                 ifelse(submerch %in% c(26,35,42,43), 7,
+                 ifelse(submerch %in% c(38,23), 13, 
+                 ifelse(submerch %in% c(16,17,18,28,44), 6,
+                 ifelse(submerch == 22, 9,
+                 ifelse(submerch %in% c(24,36), 10,
+                 ifelse(submerch %in% c(32,40,41), 11,
+                 ifelse(submerch %in% c(31,34,37), 12,
+                 ifelse(submerch == 39, 14,
+                 ifelse(submerch == 4, 15,
+                 ifelse(submerch %in% c(1,2), 18, 
+                 ifelse(submerch == 30, 20, 0
+                 )))))))))))))))))
+
+#2016 - contains submerch variable instead of merch (like in 2017), has a storedcash amnt (unlike 2017)
+```
+
+```{r 2015 data}
+#loaded in 2015 data
+data_2015 <- read_csv(file="Raw-Data/dcpc-2015-public-data-csv.csv")
+
+#cleaned 2015 data
+clean_2015 <- data_2015 %>%
+  rename(gender = male) %>%
+  select(age, income_hh, gender, race_white, race_black, race_asian, race_other, amnt, date, time, paypref_100plus, paypref_lt10, paypref_10to25, paypref_25to50, paypref_50to100, work_employed, work_self, pi, submerch, homeowner, type, carry_cc, carry_chk, carry_csh, carry_dc, enough_cash, e_exp_csh, storedcash_amnt, storedcash_amnt_payments, storedcash_amnt_savings,  denom_100_stored, denom_10_stored, denom_1_stored, denom_20_stored, denom_2_stored, denom_50_stored, denom_5_stored) %>%
+  mutate(merch = ifelse(submerch %in% c(3,5,7), 1,
+                 ifelse(submerch == 6, 2,
+                 ifelse(submerch %in% c(10,11), 3,
+                 ifelse(submerch == 9, 4,
+                 ifelse(submerch %in% c(8,15,16,17,21,23,25,29), 5,
+                 ifelse(submerch %in% c(12,13,14), 6,
+                 ifelse(submerch %in% c(22,31), 7,
+                 ifelse(submerch == 19, 9,
+                 ifelse(submerch == 18, 10,
+                 ifelse(submerch %in% c(27,30,33), 12, 
+                 ifelse(submerch %in% c(20,34), 13,
+                 ifelse(submerch == 4, 15,
+                 ifelse(submerch %in% c(1,2), 18,
+                 ifelse(submerch == 26, 20, 0
+                 
+                        ))))))))))))))) %>%
+  mutate(date = as.Date(date, "%d%b%Y"))
+
+check <- merged %>%
+  filter(year == "2015") %>%
+  select(merch)
+#2015 - no cc_num, no hispaniclatino no work_occupation,, submerch, storedcash_amnt, storedcash_amnt_payments, storedcash_amnt_savings,  denom_100_stored, denom_10_stored, denom_1_stored, denom_20_stored, denom_2_stored, denom_50_stored, denom_5_stored
+
+#dropped highest_education due to the majority of values missing and corrupted data column overall
+
+
+```
+
+```{r merged data}
+#merged 2017 and 2016 data
+twoyears <- clean_2017 %>%
+  full_join(clean_2016) %>%
+  mutate(date = as.Date(date, "%m/%d/%Y"))
+
+#merged 2017, 2016 and 2015 data
+merged <- twoyears %>%
+full_join(clean_2015)
+
+#added a new column year to the merged data set
+merged <- merged %>%
+mutate(year = format(as.Date(date, format = "%m/%d/%Y"), "%Y"))
+
+#saved the final data as a csv
+write.csv(merged, file = "merged.csv")
+
+```
+
+```{r regression models}
+#added a few binary variables that I used in my regression specification
+merged_3 <- merged %>%
+  mutate(cash = ifelse(pi == 1, 1, 0)) %>%
+  mutate(fast_food = ifelse(merch == 4, 1, 0)) %>%
+  mutate(gas = ifelse(merch == 2, 1, 0)) %>%
+  mutate(services = ifelse(merch == 6, 1, 0)) %>%
+  mutate(rest = ifelse(merch == 3, 1, 0))
+
+#same regression specification as above but with the merged data set
+regression <- glm(cash ~ age + income_hh + gender + highest_education + cc_num + race_white + race_black + race_asian + race_other + amnt + year + fast_food + gas + services + rest + paypref_100plus + paypref_lt10 + paypref_10to25 + paypref_25to50 + paypref_50to100, data = merged_3, family = "binomial")
+
+#downloaded the stargazer package to export my regression table as a html file 
+stargazer(regression, type="html", dep.var.labels   = "Cash",  covariate.labels = c("Age", "Income Level", "Gender", "Education Level", "Number of Credit Cards", "Race - White", "Race - Black", "Race - Asian", "Race - Other", "Transacton Amount", "Year2017", "Fast Food", "Gas", "Services", "Restaurants", "Pref. for Cash $100+", "Pref. for Cash <$10", "Pref. for Cash $10-$25", "Pref. for Cash $25 - $50", "Pref. for Cash $50 - $100"), out="regression.html")
+
+
+```
+
+
+
+```{r Who Uses Cash Section}
+
+#upload merged data set
 
 cash <- read_csv("who_uses_cash/merged.csv")
 
+#made a slight modification to the data set - creating more condensed education and income level variables to be used in my Shiny App and saved and exported it as merged_2 
+merged_2 <- cash %>%
+mutate(education_level = ifelse(highest_education %in% c(1,2,3,4,5,6,7,8), 1,
+                   ifelse(highest_education == 9, 2,
+                   ifelse(highest_education %in% c(11,12), 3,
+                   ifelse(highest_education == 13, 4,
+                   ifelse(highest_education == 14, 5,
+                   ifelse(highest_education == 15, 6, 
+                   ifelse(highest_education == 16, 7, 0)))))))) %>%
+mutate(income_level = ifelse(income_hh %in% c(1,2,3,4), 1,
+                  ifelse(income_hh %in% c(4,5,6), 2,
+                  ifelse(income_hh %in% c(7,8), 3,
+                  ifelse(income_hh %in% c(9,10), 4,
+                  ifelse(income_hh == 11, 5,
+                  ifelse(income_hh == 12, 6,
+                  ifelse(income_hh == 13, 7,
+                  ifelse(income_hh == 14, 8,
+                  ifelse(income_hh == 15, 9,
+                  ifelse(income_hh == 16, 10,
+                  ifelse(income_hh == 17, 11,
+                  ifelse(income_hh == 18, 12, 0)))))))))))))
+  
+write.csv(merged_2, file = "merged_2.csv")
+
+#this is the basic code for the plot that I used for all three plots in the first section of my shiny app - obviously I used a data reactive code to allow for many education levels to be filtered through  
+plot <- merged_2 %>%
+  filter(highest_education == 13) %>%
+  filter(pi <= 7,
+         pi >0) %>%
+  group_by(pi) %>%
+  count() %>%
+  ggplot(aes(x=factor(pi), y=n)) +  geom_col() +  labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels = c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+plot
+
+income <- cash %>%
+  filter(income_hh == 8) %>%
+  filter(pi %in% c(1,2,3,4,5,6,7)) %>%
+  group_by(pi) %>%
+  count() %>%
+  mutate(avg = sum(pi == 1)/sum(n))
+
+summary(merged_2$age)
+
+graph <- cash %>%
+    filter(income_hh == 12) %>%
+      filter(pi %in% c(1,2,3,4,5,6,7)) %>%
+      group_by(pi) %>%
+      count()
+
+ggplot(graph, aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+
+```
+
+
+```{r When is Cash Used Section}
+
+#Jack helped me work through this code in office hours, creating a new variable for time rounded and graphing how cash usage changes over the course of a 24-hour period. Became the basis of the code in my Shiny App 
 time_payment <- cash %>%
 mutate(time_rounded = 100*ceiling((time)/100)) %>%
   filter(!time_rounded %in% c("2450", NA, "0")) %>%
@@ -42,7 +239,6 @@ mutate(time_rounded = 100*ceiling((time)/100)) %>%
 
 ggplot(time_transaction_type, aes(x=time_rounded, y=n, color = merch_type)) + geom_point()
 
-
 time_transaction_type_2 <- cash %>%
 mutate(time_rounded = 100*ceiling((time)/100)) %>%
   filter(!time_rounded %in% c("2450", NA, "0")) %>%
@@ -53,45 +249,11 @@ mutate(time_rounded = 100*ceiling((time)/100)) %>%
 
 ggplot(time_transaction_type_2, aes(x=time_rounded, y=avg)) + geom_line() + labs(title = "Change in Transaction Ty", x = "Time", y = "Frequency of Transaction Type") + scale_x_continuous(breaks = c(400, 800, 1200, 1600, 2000, 2400), labels=c("4am", "8am", "12pm", "4pm", "8pm", "12am"))
 
-income <- cash %>%
-  filter(income_hh == 8) %>%
-  filter(pi %in% c(1,2,3,4,5,6,7)) %>%
-  group_by(pi) %>%
-  count() %>%
-  mutate(avg = sum(pi == 1)/sum(n))
+```
 
-merged_2 <- cash %>%
-mutate(education_level = ifelse(highest_education %in% c(1,2,3,4,5,6,7,8), 1,
-                   ifelse(highest_education == 9, 2,
-                   ifelse(highest_education %in% c(11,12), 3,
-                   ifelse(highest_education == 13, 4,
-                   ifelse(highest_education == 14, 5,
-                   ifelse(highest_education == 15, 6, 
-                   ifelse(highest_education == 16, 7, 0)))))))) %>%
-mutate(income_level = ifelse(income_hh %in% c(1,2,3,4), 1,
-                  ifelse(income_hh %in% c(4,5,6), 2,
-                  ifelse(income_hh %in% c(7,8), 3,
-                  ifelse(income_hh %in% c(9,10), 4,
-                  ifelse(income_hh == 11, 5,
-                  ifelse(income_hh == 12, 6,
-                  ifelse(income_hh == 13, 7,
-                  ifelse(income_hh == 14, 8,
-                  ifelse(income_hh == 15, 9,
-                  ifelse(income_hh == 16, 10,
-                  ifelse(income_hh == 17, 11,
-                  ifelse(income_hh == 18, 12, 0)))))))))))))
-  
-write.csv(merged_2, file = "merged_2.csv")
+```{r What is Cash Used for Section}
 
-summary(merged_2$age)
-
-graph <- cash %>%
-    filter(income_hh == 12) %>%
-      filter(pi %in% c(1,2,3,4,5,6,7)) %>%
-      group_by(pi) %>%
-      count()
-
-ggplot(graph, aes(x=factor(pi), y=n, fill=factor(ifelse(pi=="1","Highlighted","Normal")))) + geom_col(show.legend = FALSE) + scale_fill_manual(name = "pi", values = c("#18BC9C", "#2C3E50")) + labs(title = "Frequency of Payment Methods Used", x= "Payment Method", y = "Count") + scale_x_discrete(labels=c("1" = "Cash", "2" = "Check", "3" = "Credit Card", "4" = "Debit Card", "5" = "Prepaid/Gift", "6" = "Bank Account", "7" = "Online Payment")) + theme(axis.text.x=element_text(angle=45, hjust=1))
+#filtered data to isolate only the merchandise types I was interested in, reordered them to orient graph in the right way
 
 graph2 <- cash %>%
   mutate(pi_2 = ifelse(pi == 1, 1,
@@ -101,91 +263,53 @@ graph2 <- cash %>%
 filter(pi_2 %in% c(1,3,4)) %>%
 filter(merch %in% c(1,2,3,4,5,6,7)) %>%
 mutate(merch = fct_relevel(as.factor(merch), c("3", "5", "6", "2", "4", "1", "7"))) %>%
-drop_na(merch) %>%
-filter(year == "2015")
+drop_na(merch)
 
+#checks that my filtering was effective
 check <- cash %>%
 select(merch)
-
-ggplot(graph2, aes(merch, fill = pi_2)) + geom_bar()
 
 graph3 <- graph2 %>%
   group_by(merch) %>%
   count()
 
-p <-ggplot(graph2, aes(x = merch, y = stat(count), fill = pi))
+#basiss of the graph code
+ggplot(graph2, aes(merch, fill = pi_2)) + geom_bar()
 
-p
-
+#final graph/code used in Shiny for the cash by transaction type section
 ggplot(data = graph2) + 
 geom_bar(mapping = aes(x = as.factor(merch), fill = as.factor(pi_2))) +  scale_fill_manual(values = c("#18BC9C", "#2C3E50", "#3498DB"), name = "Payment Type", labels=c("Cash", "Debit Card", "Credit Card")) + scale_x_discrete(labels=c( "7" = "Arts & Entertainment", "1" = "Convenience & Grocery", "4" = "Fast-food & Cafes", "2" = "Gas stations", "6" = "General Services", "3" = "Sit-down Restaurants",  "5" = "Shopping")) + theme(axis.text.x=element_text(angle=45, hjust=1)) + coord_flip() + labs(title = "Frequency of Transaction Type by Payment", x = "Transaction Type", y = "Frequency", fill = "Payment Type")
 
 #F39C12 #E74C3C
+```
 
-ggplot(graph2, aes(x = merch, y = pi_2, fill = pi_2)) + geom_bar()
+```{r Cash Usage over time graph that is in the about section}
 
+#filtered graph to set up 
 
-cash_by_year <- merged_2 %>%
+final_year_graph_2 <- merged_2 %>%
   drop_na(year) %>%
   drop_na(pi) %>%
   mutate(pi_2 = ifelse(pi == 1, 1,
                 ifelse(pi == 2, 2,
                 ifelse(pi == 3, 3,
-                ifelse(pi == 4, 4, 5))))) %>%
-group_by(year, pi_2) %>%
-summarize(count = n()) %>% 
-  ungroup() %>%
-  group_by(year) %>% 
-  mutate(relative = count/n())
-
-ggplot(data = cash_by_year) + 
-geom_col(mapping = aes(x = year, y = relative)) 
-
-+ geom_text(aes(x = year, label = paste0(relative,'%')),
-            colour = 'white', position=position_stack(vjust=0.5))
-
-merged_2 %>%
-drop_na(year) %>%
-drop_na(pi) %>%
-mutate(pi_2 = ifelse(pi == 1, 1,
-ifelse(pi == 2, 2,
-ifelse(pi == 3, 3,
-ifelse(pi == 4, 4, 5))))) %>% group_by(year, pi_2) %>% count() %>% ungroup() %>% group_by(year) %>% mutate(relative = n/sum(n)) %>% view()
-
-
-#group_by(year) %>%
- summarize(percent_cash = sum(pi == 1)/)
-
-ggplot(data = cash_by_year) + 
-geom_col(mapping = aes(x = year, y = percent_cash))
-  
-  
-cash_by_year_2 <- merged_2 %>%
-  drop_na(year) %>%
-  drop_na(pi) %>%
-   mutate(pi_2 = ifelse(pi == 1, 1,
-                ifelse(pi == 2, 2,
-                ifelse(pi == 3, 3,
-                ifelse(pi == 4, 4, 5))))) %>%
+                ifelse(pi == 4, 4, 5))))) %>% 
   group_by(year, pi_2) %>%
-  summarise('number'=sum(pi_2)) %>%
-  ungroup() %>%
-  mutate('relative'=unlist(by(data = number, INDICES = year, 
-                              FUN = function(x) round(x/sum(x)*100, digits = 1))))
-  
-ggplot(merged_2, )
+  count() %>%
+  ungroup() %>% 
+  group_by(year) %>% 
+  mutate(relative = round(n/sum(n), digits = 3))
 
+#used png to set the directory and file name of graph to save
+png(file = "who_uses_cash/www/my_plot.png")
 
-final_year_graph <- merged_2 %>%
-  drop_na(year) %>%
-  drop_na(pi) %>%
-  mutate(pi_2 = ifelse(pi == 1, 1,
-                ifelse(pi == 3, 2,
-                ifelse(pi == 4, 3, 4)))) %>% group_by(year, pi_2) %>% count() %>% ungroup() %>% group_by(year) %>% mutate(relative = n/sum(n))
+#created a ggplot where year is the x and y is the relative percentage of each payment type, color palent is in line with the shiny theme I choose
+ggplot(data = final_year_graph_2) + 
+geom_col(mapping = aes(x = year, y = relative, fill = as.factor(pi_2))) + labs(title = "Change in Payment Type Usage Over Time", x = "Year", y = "Relative Percentage", fill = "Payment Type", caption = "Calculations do not include transactions where payment type was missing" ) + scale_fill_manual(values = c("#18BC9C", "#2C3E50", "#F39C12", "#E74C3C", "#3498DB"), name = "Payment Type", labels=c("Cash", "Check", "Credit Card", "Debit Card", "Other")) + scale_y_continuous(labels = scales::percent) + geom_text(aes(x = year, y = relative, fill = as.factor(pi_2), label = paste0(relative*100,"%")), color = "white", size = 4, position = position_stack(vjust = 0.5))
 
-ggplot(data = final_year_graph) + 
-geom_col(mapping = aes(x = year, y = relative, fill = as.factor(pi_2))) 
+dev.off()
 
+#other idea for a different plot to use but did not end up using it 
 ggplot(final_year_graph, aes(x=year, y=relative, group = pi_2)) + geom_line()
 
 ```
